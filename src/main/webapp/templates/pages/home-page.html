@@ -24,14 +24,20 @@
 </div>
 
 <!-- Content -->
-<div id="content" class="container-fluid mt40">
+<div id="content" class="container-fluid mt20">
     <div class="row">
         
         <!-- Left Side -->
         <div class="col-xs-4 content-left-side">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
-                    <h4 class="mt0 mb0">{{captions.topics}}</h4>
+                    <h4 class="mt0 mb0">
+						<div class="row text-center" style="word-break: normal;">
+							<div class="col-xs-4"><a class="ns-underline" ng-click="change_topic_tab('GENERAL')">{{captions.topics}}</a></div>
+							<div class="col-xs-4"><a class="ns-underline" ng-click="change_topic_tab('DOCUMENT')">{{captions.projects}}</a></div>
+							<div class="col-xs-4"><a class="ns-underline" ng-click="change_topic_tab('FAVORITE')"><i class="fa fa-star"></i></a></div>
+						</div>
+					</h4>
                 </div>
                 <div class="panel-body">
                     
@@ -120,7 +126,19 @@
             <div class="panel panel-bordered panel-heading-only" ng-if="rightSide.title">
             	<div class="row">
 	                <div class="panel-heading col-xs-8">
-	                    <h4 class="mt6 mb6" ng-class="{topic:Topic}">{{rightSide.title}}</h4>
+						<div class="row">
+							<div class="topic_fav_div" ng-if="showTopicFabBtn">
+								<h4 class="mt6 mb0"><a class="topic_fav_btn" data-title="{{!Topic.liked ? captions.add_favorite : captions.rem_favorite}}" ng-class="{'active': Topic.liked}" ng-click="topic_fav($event)"><i class="fa"></i></a></h4>
+							</div>
+							<div>
+								<h4 class="mt6 mb6">{{rightSide.title}}</h4>
+								<div ng-show="Topic && Topic.link_description" style="font-size:12px">
+									<ul>
+										<li><a ng-click="open_document(Topic.link)" class="ns-underline"><i class="fa fa-external-link"></i> {{Topic.link_description}}</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
 	                </div>
 	                <div class="col-xs-4 text-right" ng-if="Topic">
 	                    <a class="btn btn-custom-3 color-text-3" ng-click="add_entry($event,Topic)"><i class="fa fa-plus"></i> {{captions.addText}}</a>

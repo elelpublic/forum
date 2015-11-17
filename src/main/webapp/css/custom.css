@@ -646,7 +646,7 @@ blockquote {
 }
 
 .entry-item .icon img {
-    border-radius: 3px;
+    border-radius: 50%;
 }
 
 .entry-item .col-xs-11 {
@@ -665,12 +665,19 @@ blockquote {
     white-space: pre-wrap;
 }
 
+.panel-heading .documents,
 .entry-item .documents {
     font-size: 12px;
     margin: 10px 0;
     margin-left: 15px;
     padding-left: 15px;
     border-left: 3px solid #e3e4fc;
+}
+
+.panel-heading .documents {
+	margin-top: 15px;
+	margin-bottom: 5px;
+	margin-left: 0;
 }
 
 .documents .post-form-document a.remove_post_link {
@@ -844,6 +851,41 @@ blockquote {
 
 .inputTopicAdd-drop:active {
     box-shadow: inset 0 0 7px rgba(0,0,0,0.08);
+}
+
+.topic_fav_div {
+	float: left;
+}
+
+.topic_fav_div + div {
+	float: left;
+	width: 94%;
+}
+
+.topic_fav_btn {
+	color: #fdb714;
+	margin-right: 5px;
+	cursor: pointer;
+}
+
+.topic_fav_btn:hover {
+	color: #fdb714;
+}
+
+.topic_fav_btn i:before {
+	content: "\f006";
+}
+
+.topic_fav_btn:hover i:before {
+	content: "\f005";
+}
+
+.topic_fav_btn.active i:before {
+	content: "\f005";
+}
+
+.topic_fav_btn.active:hover i:before {
+	content: "\f006";
 }
 
 /*
