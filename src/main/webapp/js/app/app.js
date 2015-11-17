@@ -2,7 +2,7 @@
  * Forum | Application
  * Copyright (c) 2015 Infodesire
  * Website: http://infodesire.com/
- * Version: 0.0.10 (02-Nov-2015)
+ * Version: 0.0.11 (17-Nov-2015)
  * Requires: AngularJS 1.3 or later, jQuery v1.7.1 or later 
  */
 (function(){
@@ -100,6 +100,9 @@
             topics: "Document|Topics",
             entry: "Document|Entry",
             entries: "Document|Entries",
+            projects: "Document|Projects",
+            add_favorite: "${Phrases:Add $0}:::${Document:Favorite}",
+            rem_favorite: "${Phrases:delete $0}:::${Document:Favorite}",
             sortBy: "Tooltip|Sort",
             text: "Document|Content",
             cancel: "Document|Cancel",
@@ -234,9 +237,17 @@
                 $scope.Topic.id = data.Entries[0].id;
                 $scope.Topic.title = data.Entries[0].title;
                 $scope.Topic.link = data.Entries[0].link;
-                TopicsService.getTopicDescription($scope.Topic, function(){
-                    _setRightSideCaption("title", "($scope.Topic.description)");
-                });
+                $scope.showTopicFabBtn = true;
+				TopicsService.get_likes($scope.Topic);
+				if($scope.Topic.link){
+					DocumentsService.getName($scope.Topic.link, function(data){
+						if(!data) return false;
+
+						$scope.Topic.link_description = data.Entries[0]["translation"];
+					});
+				}
+				
+				_setRightSideCaption('title', '$scope.Topic.title');
             });
         }
         
@@ -296,71 +307,76 @@
          * @service TopicsService
          * @method list
          */
-        TopicsService.list(function(data){
-            if(!data) return false;
-            
-            $scope.Topics = data.Entries;
-            
-            for(var key in $scope.Topics){
-                TopicsService.getTopicDescription($scope.Topics[key]);
-            }
-            
-            /**
-             * Get one or a list of entries
-             *
-             * @param callback {Function}
-             * @service EntriesService
-             * @method list, get
-             */
-            if($scope.mode == 'home' || $scope.mode == 'view' || $scope.mode == 'edit'){
-            	var fn = 'list',
-            	param = null,
-            	param2 = null,
-            	param3 = null;
-            	
-            	switch($scope.mode){
-            	case 'home':
-            		fn = 'list';
-            		if(_zhType == "list"){
-            			param = $routeParams.topicId;
-            		}else{
-            			param3 = $scope.rightSide.pagination.page;   
-            		}
-            		break;
-            	case 'view':
-            		fn = 'get';
-            		param = $routeParams.entryId;
-            		param2 = true;
-            		break;
-            	case 'edit':
-            		fn = 'get';
-            		param = $routeParams.entryId;
-            		param2 = false;
-            		break;
-            	}
-            	
-            	/**
-            	 * Get one or a list of forum entries
-            	 *
-            	 * @param param {Null, String} null, topic title, entry id
-            	 * @param callback {Function}
-            	 * @param document_link {String}
-            	 * @service EntriesService
-            	 * @method fn {String} list, get
-            	 */
-            	EntriesService[fn](param, function(data){
-            		if(!data) return $scope.mode == 'home' ? false : location.href = '#/';
-            		
-            		$scope.Entries = EntriesService.convert_entries(data.Entries, param2, $scope.mode == 'edit', $scope.Topics);
-            		
-            		if($scope.mode == 'edit'){
-            			$scope.Entry = $scope.Entries[0];
-            			$scope.form_open_entry($scope.Entries);
-            		}
-            	}, $scope.document_link.href, param3);
-            }
-            
-        }, $scope.document_link.href);
+        $scope.GetTopics = function(category){
+			TopicsService.list(function(data){
+				if(!data) return false;
+
+				$scope.Topics = data.Entries;
+
+				for(var key in $scope.Topics){
+					TopicsService.getTopicDescription($scope.Topics[key]);
+				}
+				
+				if(category) return true;
+
+				/**
+				 * Get one or a list of entries
+				 *
+				 * @param callback {Function}
+				 * @service EntriesService
+				 * @method list, get
+				 */
+				if($scope.mode == 'home' || $scope.mode == 'view' || $scope.mode == 'edit'){
+					var fn = 'list',
+					param = null,
+					param2 = null,
+					param3 = null;
+
+					switch($scope.mode){
+					case 'home':
+						fn = 'list';
+						if(_zhType == "list"){
+							param = $routeParams.topicId;
+						}else{
+							param3 = $scope.rightSide.pagination.page;   
+						}
+						break;
+					case 'view':
+						fn = 'get';
+						param = $routeParams.entryId;
+						param2 = true;
+						break;
+					case 'edit':
+						fn = 'get';
+						param = $routeParams.entryId;
+						param2 = false;
+						break;
+					}
+
+					/**
+					 * Get one or a list of forum entries
+					 *
+					 * @param param {Null, String} null, topic title, entry id
+					 * @param callback {Function}
+					 * @param document_link {String}
+					 * @service EntriesService
+					 * @method fn {String} list, get
+					 */
+					EntriesService[fn](param, function(data){
+						if(!data) return $scope.mode == 'home' ? false : location.href = '#/';
+
+						$scope.Entries = EntriesService.convert_entries(data.Entries, param2, $scope.mode == 'edit', $scope.Topics);
+
+						if($scope.mode == 'edit'){
+							$scope.Entry = $scope.Entries[0];
+							$scope.form_open_entry($scope.Entries);
+						}
+					}, $scope.document_link.href, param3);
+				}
+
+			}, $scope.document_link.href, category ? category : "GENERAL");
+		}
+		$scope.GetTopics();
         
         
         // ------------------------ App HTML functions ---------------------------
@@ -584,6 +600,34 @@
                 post_links.splice(id, 1);   
             }
         }
+		
+		/**
+         * change_topic_tab
+         *
+         * Change the topics Tab
+         *
+         * @param e {Object} Event
+         */
+		$scope.change_topic_tab = function(category){
+			if($scope.topics_category == category) return;
+			$scope.Topics = [];
+			$scope.GetTopics(category);
+			$scope.topics_category = category;
+		}
+		
+		/**
+         * topic_fav
+         *
+         * Toggle topic to favorites
+         *
+         * @param e {Object} Event
+         */
+		$scope.topic_fav = function(e){
+			if($scope.Topic){
+				$scope.Topic.liked = !$scope.Topic.liked;
+				TopicsService.like($scope.Topic.id, {like: $scope.Topic.liked});
+			}
+		}
         
         /**
          * pagination
@@ -662,8 +706,8 @@
         if($scope.mode == 'edit'){
             $scope.rightSide.formTitle = _setRightSideCaption("formTitle", "$filter('ucfirst')($scope.captions.editText)");
         }
-        if($scope.Topic && $scope.Topic.description){
-            $scope.rightSide.title = $scope.Topic.description;
+        if($scope.Topic){
+            $scope.rightSide.title = $scope.Topic.title;
         }
         if($scope.document_link.href){
             $scope.rightSide.title = $scope.document_link.title;   
@@ -957,11 +1001,12 @@
      * @method getTopicDescription {function}
      */
     app.service('TopicsService', function($http, DocumentsService, AjaxService){
-        this.list = function(callback, topicLink){
+        this.list = function(callback, topicLink, category){
             var url = 'api/json/' + clientId + '/topics',
                 filters = {};
             
         	if(topicLink) filters["topicLink"] = topicLink;
+        	if(category) filters["category"] = category;
             
             AjaxService.send('get', url + '?' + _location.createQueryData(filters)).success(function(r){
                 if(r.StatusCode && r.StatusCode.CodeNumber == 0 && r.Entries){
@@ -1009,6 +1054,33 @@
                 if(callback){callback(false);}else{return false;}; 
             }); 
         }
+		
+		this.like = function(id, data, callback){
+			AjaxService.send('put',  'api/json/' + clientId + '/likes/^.|Forum|Topic|1|' + id, data).success(function(r){
+                if(r.StatusCode && r.StatusCode.CodeNumber == 0 && r.Entries){
+                    if(callback){callback(r);}else{return true;};
+                }else{
+                    if(callback){callback(false);}else{return false;};
+                }
+            }).error(function(){
+                if(callback){callback(false);}else{return false;}; 
+            }); 
+		}
+		
+		this.get_likes = function(topic){
+			(function(Topic){
+				var id = encodeURIComponent("^.|Forum|Topic|1|" + Topic.id);
+				
+				AjaxService.send('get',  'api/json/' + clientId + '/likes/' + id).success(function(r){
+					if(r.StatusCode && r.StatusCode.CodeNumber == 0 && r.Entries){
+						Topic.liked = r.Entries[0].like;
+						Topic.likes = r.Entries[0].likes;
+					}else{
+						if(callback){callback(false);}else{return false;};
+					}
+				});
+			})(topic);
+		}
         
         this.getTopicDescription = function(topic, callback){
             topic.description = topic.title;
@@ -1173,7 +1245,7 @@
                     link: null,
                     description: val.topic
                 };
-                if(Topics){
+                if(Topics && false){
                     for(key in Topics){
                         if(Topics[key].id == val.topic.id){
                             val.topic.title = Topics[key].title;
