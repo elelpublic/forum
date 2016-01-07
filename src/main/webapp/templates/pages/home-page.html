@@ -175,7 +175,7 @@
                                     </div>
                                     <div class="pull-right">
                                         <ul class="list-inline">
-                                            <li><a class="footer-likes" ng-click="like_entry($event, entry, index)" ng-class="{'active': entry.liked}"><i class="fa fa-heart-o"></i> {{entry.likes}} {{captions.likes}}</a></li>
+                                            <li><a class="footer-likes" ng-click="like_entry($event, entry, index)" ng-class="{'active': entry.liked}"><i class="fa fa-heart{{entry.liked ? '' : '-o'}}"></i> {{entry.likes}} {{captions.likes}}</a></li>
                                             <li><a class="footer-comments" ng-click="comment_entry($event, entry, null, index)"><i class="fa fa-comment-o"></i> {{entry.comments.length}} {{captions.comments}}</a></li>
                                         </ul>
                                     </div>
