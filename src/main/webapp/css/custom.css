@@ -642,17 +642,23 @@ blockquote {
 }
 
 .entry-item .icon {
-    max-width: 34px;
+    width: 34px;
+    height: 34px;
+    overflow: hidden;
+    border-radius: 50%;
 }
 
 .entry-item .icon img {
-    border-radius: 50%;
+    max-height: 100%;
+	max-width: none;
+    min-width: 100%;
+    min-height: 100%;
 }
 
 .entry-item .col-xs-11 {
     width: auto;
     float: none;
-    margin-left: 35px;
+    margin-left: 50px;
 }
 
 .entry-item .user-name h5 {
@@ -876,18 +882,9 @@ blockquote {
 	content: "\f006";
 }
 
-.topic_fav_btn:hover i:before {
-	content: "\f005";
-}
-
 .topic_fav_btn.active i:before {
 	content: "\f005";
 }
-
-.topic_fav_btn.active:hover i:before {
-	content: "\f006";
-}
-
 /*
 	==============================
           * Plugins Code *
