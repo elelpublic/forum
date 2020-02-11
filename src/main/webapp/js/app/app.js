@@ -1234,7 +1234,9 @@
             
             for(var i = 0, val = null; i<entries.length; i++){
                 val = entries[i];
-                
+
+                val.text = _escapeXss(val.text);
+
                 //user avatar
                 val.lastModifiedByImageURL = '/projectile/' + val.lastModifiedByImageURL;
                 
@@ -1324,6 +1326,13 @@
             }
 
             return data;
+        }
+
+        _escapeXss = function(text) {
+            if (!text || typeof text !== 'string') return text;
+            return text.replace(/["'<>/]/g, function(c) {
+                return '&#' + c.charCodeAt(0) + ';';
+            });
         }
     });
     
